@@ -1,0 +1,170 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/glad.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/glad.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/main.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/main.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/engine/global.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/engine/global.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/engine/render/render.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/engine/render/render.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/engine/render/render_init.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/engine/render/render_init.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/engine/render/render_util.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/engine/render/render_util.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/engine/io/io.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/engine/io/io.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/engine/input/input.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/engine/input/input.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/engine/config/config.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/engine/config/config.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/engine/time/time.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/engine/time/time.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/engine/physics/physics.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/engine/physics/physics.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/engine/array_list/array_list.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/engine/array_list/array_list.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
+  }
+]
