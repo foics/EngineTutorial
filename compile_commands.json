@@ -166,5 +166,19 @@
     "directory": "/home/foics/code/C/game-engine",
     "file": "/home/foics/code/C/game-engine/src/engine/array_list/array_list.c",
     "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/engine/entity/entity.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/engine/entity/entity.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
   }
 ]
