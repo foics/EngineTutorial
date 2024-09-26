@@ -8,6 +8,7 @@
 
 typedef struct entity {
     size_t body_id;
+    size_t animation_id;
     bool is_active;
 } Entity;
 

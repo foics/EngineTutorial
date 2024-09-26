@@ -12,6 +12,7 @@
 #include "engine/physics.h"
 #include "engine/entity.h"
 #include "engine/render.h"
+#include "engine/animation.h"
 
 typedef enum collision_layer {
     COLLISION_LAYER_PLAYER = 1,
@@ -33,16 +34,16 @@ static void input_handle(Body *body_player) {
     f32 vely = body_player->velocity[1];
 
     if (global.input.right) {
-        velx += 600;
+        velx += 300;
     }
 
     if (global.input.left) {
-        velx -= 600;
+        velx -= 300;
     }
 
     if (global.input.up && player_is_grounded) {
         player_is_grounded = false;
-        vely = 2000;
+        vely = 1000;
     }
 
     body_player->velocity[0] = velx;
@@ -78,6 +79,7 @@ int main(int argc, char *argv[]) {
     SDL_Window *window = render_init();
     physics_init();
     entity_init();
+    animation_init();
 
     SDL_ShowCursor(false);
 
@@ -103,6 +105,19 @@ int main(int argc, char *argv[]) {
     Sprite_Sheet sprite_sheet_player;
     render_sprite_sheet_init(&sprite_sheet_player, "assets/player.png", 24, 24);
 
+    size_t adef_player_walk_id = animation_definition_create(
+            &sprite_sheet_player,
+            (f32[]){0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
+            (u8[]){0, 0, 0, 0, 0, 0, 0},
+            (u8[]){1, 2, 3, 4, 5, 6, 7},
+            7);
+    size_t adef_player_idle_id = animation_definition_create(&sprite_sheet_player, (f32[]){0}, (u8[]){0}, (u8[]){0}, 1);
+    size_t anim_player_walk_id = animation_create(adef_player_walk_id, true);
+    size_t anim_player_idle_id = animation_create(adef_player_idle_id, false);
+
+    Entity *player = entity_get(player_id);
+    player->animation_id = anim_player_idle_id;
+
     while (!should_quit) {
         time_update();
 
@@ -120,6 +135,13 @@ int main(int argc, char *argv[]) {
 
         Entity *player = entity_get(player_id);
         Body *body_player = physics_body_get(player->body_id);
+
+        if (body_player->velocity[0] == 0) {
+            player->animation_id = anim_player_idle_id;
+        } else {
+            player->animation_id = anim_player_walk_id;
+        }
+
         Static_Body *static_body_a = physics_static_body_get(static_body_a_id);
         Static_Body *static_body_b = physics_static_body_get(static_body_b_id);
         Static_Body *static_body_c = physics_static_body_get(static_body_c_id);
@@ -129,6 +151,7 @@ int main(int argc, char *argv[]) {
         input_update();
         input_handle(body_player);
         physics_update();
+        animation_update(global.time.delta);
 
         render_begin();
 
@@ -142,9 +165,34 @@ int main(int argc, char *argv[]) {
         render_aabb((f32*)physics_body_get(entity_get(entity_a_id)->body_id), (vec4){1, 0.5, 0, 1});
         render_aabb((f32*)physics_body_get(entity_get(entity_b_id)->body_id), (vec4){1, 0.5, 0, 1});
 
-        render_sprite_sheet_frame(&sprite_sheet_player, 1, 2, (vec2){100, 100});
-        render_sprite_sheet_frame(&sprite_sheet_player, 0, 4, (vec2){200, 200});
-        render_sprite_sheet_frame(&sprite_sheet_player, 0, 0, body_player->aabb.position);
+        // render_sprite_sheet_frame(&sprite_sheet_player, 1, 2, (vec2){100, 100});
+        // render_sprite_sheet_frame(&sprite_sheet_player, 0, 4, (vec2){200, 200});
+        // render_sprite_sheet_frame(&sprite_sheet_player, 0, 0, body_player->aabb.position);
+
+        // Render animated entities...
+        for (size_t i = 0; i < entity_count(); i++) {
+            Entity *entity = entity_get(i);
+            if (!entity->is_active) {
+                continue;
+            }
+
+            if (entity->animation_id == (usize)-1) {
+                continue;
+            }
+
+            Body *body = physics_body_get(entity->body_id);
+            Animation *anim = animation_get(entity->animation_id);
+            Animation_Definition *adef = anim->definition;
+            Animation_Frame *aframe = &adef->frames[anim->current_frame_index];
+
+            if (body->velocity[0] < 0) {
+                anim->is_flipped = true;
+            } else if (body->velocity[0] > 0) {
+                anim->is_flipped = false;
+            }
+
+            render_sprite_sheet_frame(adef->sprite_sheet, aframe->row, aframe->column, body->aabb.position, anim->is_flipped);
+        }
 
         render_end(window, sprite_sheet_player.texture_id);
 
