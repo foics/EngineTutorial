@@ -25,6 +25,8 @@ typedef struct body {
     On_Hit_Static on_hit_static;
     u8 collision_layer;
     u8 collision_mask;
+    bool is_kinematic;
+    bool is_active;
 } Body;
 
 typedef struct static_body {
@@ -42,7 +44,7 @@ typedef struct hit {
 
 void physics_init(void);
 void physics_update(void);
-size_t physics_body_create(vec2 position, vec2 size, vec2 velocity, u8 collision_layer, u8 collision_mask, On_Hit on_hit, On_Hit_Static on_hit_static);
+size_t physics_body_create(vec2 position, vec2 size, vec2 velocity, u8 collision_layer, u8 collision_mask, bool is_kinematic, On_Hit on_hit, On_Hit_Static on_hit_static);
 Body *physics_body_get(size_t index);
 size_t physics_static_body_create(vec2 position, vec2 size, u8 collision_layer);
 Static_Body *physics_static_body_get(size_t index);
