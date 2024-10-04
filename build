@@ -1,3 +1,3 @@
 #!/bin/bash
 
-bear -- gcc src/*.c src/engine/*.c src/engine/render/*.c src/engine/io/*.c src/engine/input/*.c src/engine/config/*.c src/engine/time/*.c src/engine/physics/*.c src/engine/array_list/*.c src/engine/entity/*.c src/engine/animation/*.c -I include/ -lSDL2 -lSDL2main -lm -o game.exe
+bear -- gcc src/*.c src/engine/*.c src/engine/render/*.c src/engine/io/*.c src/engine/input/*.c src/engine/config/*.c src/engine/time/*.c src/engine/physics/*.c src/engine/array_list/*.c src/engine/entity/*.c src/engine/animation/*.c src/engine/audio/*.c -I include/ -lSDL2 -lSDL2main -lSDL2_mixer -lm -o game.exe

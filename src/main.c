@@ -13,6 +13,10 @@
 #include "engine/entity.h"
 #include "engine/render.h"
 #include "engine/animation.h"
+#include "engine/audio.h"
+
+static Mix_Music *MUSIC_STAGE_1;
+static Mix_Chunk *SOUND_JUMP;
 
 static const f32 SPEED_ENEMY_LARGE = 200;
 static const f32 SPEED_ENEMY_SMALL = 4000;
@@ -49,6 +53,7 @@ static void input_handle(Body *body_player) {
     if (global.input.up && player_is_grounded) {
         player_is_grounded = false;
         vely = 1000;
+        audio_sound_play(SOUND_JUMP);
     }
 
     body_player->velocity[0] = velx;
@@ -105,11 +110,16 @@ void fire_on_hit(Body *self, Body *other, Hit hit) {
 
 int main(int argc, char *argv[]) {
     time_init(60);
-    config_init();
     SDL_Window *window = render_init();
+    config_init();
     physics_init();
     entity_init();
     animation_init();
+    audio_init();
+
+    audio_sound_load(&SOUND_JUMP, "assets/jump.wav");
+    audio_music_load(&MUSIC_STAGE_1, "assets/breezys_mega_quest_2_stage_1.mp3");
+    audio_music_play(MUSIC_STAGE_1);
 
     SDL_ShowCursor(false);
 

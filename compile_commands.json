@@ -194,5 +194,19 @@
     "directory": "/home/foics/code/C/game-engine",
     "file": "/home/foics/code/C/game-engine/src/engine/animation/animation.c",
     "output": "/home/foics/code/C/game-engine/game.exe"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "include/",
+      "-o",
+      "game.exe",
+      "src/engine/audio/audio.c"
+    ],
+    "directory": "/home/foics/code/C/game-engine",
+    "file": "/home/foics/code/C/game-engine/src/engine/audio/audio.c",
+    "output": "/home/foics/code/C/game-engine/game.exe"
   }
 ]
