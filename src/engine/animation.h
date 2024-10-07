@@ -33,3 +33,4 @@ size_t animation_create(size_t animation_definition_id, bool does_loop);
 void animation_destory(size_t id);
 Animation *animation_get(size_t id);
 void animation_update(f32 dt);
+void animation_render(Animation *animation, vec2 position, vec4 color, u32 texture_slots[8]);

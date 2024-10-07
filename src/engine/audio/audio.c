@@ -1,6 +1,7 @@
 #include "../audio.h"
 #include "../types.h"
 #include "../util.h"
+#include <SDL2/SDL_mixer.h>
 
 void audio_init(void) {
     SDL_Init(SDL_INIT_AUDIO);
@@ -13,6 +14,9 @@ void audio_init(void) {
     if (Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_chunksize)) {
         ERROR_EXIT("SDL_Mixer error: OpenAudio: %s\n", Mix_GetError());
     }
+
+    Mix_Volume(-1, 6);
+    Mix_VolumeMusic(2);
 }
 
 void audio_sound_load(Mix_Chunk **chunk, const char *path) {

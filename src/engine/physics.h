@@ -48,6 +48,7 @@ size_t physics_body_create(vec2 position, vec2 size, vec2 velocity, u8 collision
 Body *physics_body_get(size_t index);
 size_t physics_static_body_create(vec2 position, vec2 size, u8 collision_layer);
 Static_Body *physics_static_body_get(size_t index);
+size_t physics_static_body_count();
 bool physics_point_intersect_aabb(vec2 point, AABB aabb);
 bool physics_aabb_intersect_aabb(AABB a, AABB b);
 AABB aabb_minkowski_difference(AABB a, AABB b);
