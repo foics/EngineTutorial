@@ -9,8 +9,9 @@
 typedef struct entity {
     size_t body_id;
     size_t animation_id;
-    bool is_active;
     vec2 sprite_offset;
+    bool is_active;
+    bool is_enraged;
 } Entity;
 
 void entity_init(void);
