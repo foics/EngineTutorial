@@ -57,3 +57,4 @@ AABB aabb_minkowski_difference(AABB a, AABB b);
 void aabb_penetration_vector(vec2 r, AABB aabb);
 void aabb_min_max(vec2 min, vec2 max, AABB aabb);
 Hit ray_intersect_aabb(vec2 position, vec2 magnitude, AABB aabb);
+void physics_reset(void);

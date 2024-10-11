@@ -15,6 +15,8 @@
 #include "engine/animation.h"
 #include "engine/audio.h"
 
+void reset(void);
+
 static Mix_Music *MUSIC_STAGE_1;
 static Mix_Chunk *SOUND_JUMP;
 
@@ -34,18 +36,52 @@ typedef enum collision_layer {
     COLLISION_LAYER_PROJECTILE = 1 << 4,
 } Collision_Layer;
 
+typedef enum weapon_type {
+    WEAPON_TYPE_SHOTGUN,
+    WEAPON_TYPE_PISTOL,
+    WEAPON_TYPE_REVOLVER,
+    WEAPON_TYPE_SMG,
+    WEAPON_TYPE_ROCKET_LAUNCHER,
+    WEAPON_TYPE_COUNT
+} Weapon_Type;
+
+typedef enum projectile_type {
+    PROJECTILE_TYPE_SMALL,
+    PROJECTILE_TYPE_LARGE,
+    PROJECTILE_TYPE_ROCKET
+} Projectile_Type;
+
+typedef struct weapon {
+    f32 fire_rate;
+    f32 recoil;
+    f32 projectile_speed;
+    Projectile_Type projectile_type;
+    vec2 sprite_size;
+    vec2 sprite_offset;
+    size_t projectile_animation_id;
+} Weapon;
+
+static Weapon weapons[WEAPON_TYPE_COUNT] = {0};
+
 static f32 width;
 static f32 height;
+static u32 texture_slots[8] = {0};
 
 static bool should_quit = false;
 
 static bool player_is_grounded = false;
+static Weapon_Type weapon_type = WEAPON_TYPE_PISTOL;
+
 static size_t anim_player_walk_id;
 static size_t anim_player_idle_id;
 static size_t anim_enemy_small_id;
 static size_t anim_enemy_large_id;
 static size_t anim_enemy_small_enraged_id;
 static size_t anim_enemy_large_enraged_id;
+static size_t anim_fire_id;
+static size_t anim_projectile_small_id;
+
+static size_t player_id;
 
 static f32 ground_timer = 0;
 static f32 shoot_timer = 0;
@@ -55,6 +91,17 @@ static u8 enemy_mask = COLLISION_LAYER_PLAYER | COLLISION_LAYER_TERRAIN;
 static u8 player_mask = COLLISION_LAYER_ENEMY | COLLISION_LAYER_TERRAIN | COLLISION_LAYER_ENEMY_PASSTHROUGH;
 static u8 fire_mask = COLLISION_LAYER_ENEMY | COLLISION_LAYER_PLAYER;
 static u8 projectile_mask = COLLISION_LAYER_ENEMY | COLLISION_LAYER_TERRAIN;
+
+static void spawn_projectile(Projectile_Type projectile_type) {
+    Weapon weapon = weapons[weapon_type];
+    Entity *player = entity_get(player_id);
+    Body *body = physics_body_get(player->body_id);
+    Animation *animation = animation_get(player->animation_id);
+    bool is_flipped = animation->is_flipped;
+    vec2 velocity = {is_flipped ? -weapon.projectile_speed : weapon.projectile_speed, 0};
+
+    entity_create(body->aabb.position, weapon.sprite_size, weapon.sprite_offset, velocity, 0, 0, true, weapon.projectile_animation_id, NULL, NULL);
+}
 
 static void input_handle(Body *body_player) {
     if (global.input.escape) {
@@ -87,6 +134,12 @@ static void input_handle(Body *body_player) {
 
     body_player->velocity[0] = velx;
     body_player->velocity[1] = vely;
+
+    if (global.input.shoot && shoot_timer <= 0) {
+        Weapon weapon = weapons[weapon_type];
+        shoot_timer = weapon.fire_rate;
+        spawn_projectile(weapon.projectile_type);
+    }
 }
 
 void player_on_hit(Body *self, Body *other, Hit hit) {
@@ -160,7 +213,7 @@ void spawn_enemy(bool is_small, bool is_enraged, bool is_flipped) {
 
     if (is_enraged) {
         speed *= 1.5;
-        animation_id = is_small ? anim_enemy_small_enraged_id : anim_enemy_large_id;
+        animation_id = is_small ? anim_enemy_small_enraged_id : anim_enemy_large_enraged_id;
     }
 
     vec2 velocity = {is_flipped ? -speed : speed, 0};
@@ -171,45 +224,30 @@ void spawn_enemy(bool is_small, bool is_enraged, bool is_flipped) {
 
 void fire_on_hit(Body *self, Body *other, Hit hit) {
     if (other->collision_layer == COLLISION_LAYER_ENEMY) {
-        for (size_t i = 0; i < entity_count(); i++) {
-            Entity *entity = entity_get(i);
-
-            if (entity->body_id == hit.other_id) {
-                Body *body = physics_body_get(entity->body_id);
-                body->is_active = false;
-                entity->is_active = false;
-
-                bool is_small = entity->animation_id == anim_enemy_small_id || anim_enemy_small_enraged_id;
-                bool is_flipped = rand() % 100 >= 50;
-                spawn_enemy(is_small, true, is_flipped);
-
-                break;
-            }
+        if (other->is_active) {
+            Entity *enemy = entity_get(other->entity_id);
+            bool is_small = enemy->animation_id == anim_enemy_small_id || enemy->animation_id == anim_enemy_small_enraged_id;
+            bool is_flipped = rand() % 100 >= 50;
+            spawn_enemy(is_small, true, is_flipped);
+            enemy->is_active = false;
+            other->is_active = false;
         }
+    } else if (other->collision_layer == COLLISION_LAYER_PLAYER) {
+        reset();
     }
 }
 
-int main(int argc, char *argv[]) {
-    time_init(60);
-    SDL_Window *window = render_init();
-    config_init();
-    physics_init();
-    entity_init();
-    animation_init();
-    audio_init();
-
-    audio_sound_load(&SOUND_JUMP, "assets/jump.wav");
-    audio_music_load(&MUSIC_STAGE_1, "assets/breezys_mega_quest_2_stage_1.mp3");
+void reset(void) {
     audio_music_play(MUSIC_STAGE_1);
 
-    SDL_ShowCursor(false);
+    physics_reset();
+    entity_reset();
 
-    i32 window_width, window_height;
-    SDL_GetWindowSize(window, &window_width, &window_height);
-    width = window_width / render_get_scale();
-    height = window_height / render_get_scale();
+    ground_timer = 0;
+    spawn_timer = 0;
+    shoot_timer = 0;
 
-    size_t player_id = entity_create((vec2){100, 200}, (vec2){24, 24}, (vec2){0, 0}, (vec2){0, 0}, COLLISION_LAYER_PLAYER, player_mask, false, (size_t)-1, player_on_hit, player_on_hit_static);
+    player_id = entity_create((vec2){100, 200}, (vec2){24, 24}, (vec2){0, 0}, (vec2){0, 0}, COLLISION_LAYER_PLAYER, player_mask, false, (size_t)-1, player_on_hit, player_on_hit_static);
 
     // init level
     physics_static_body_create((vec2){width * 0.5, height - 16}, (vec2){width, 32}, COLLISION_LAYER_TERRAIN);
@@ -226,16 +264,42 @@ int main(int argc, char *argv[]) {
 
     physics_trigger_create((vec2){width * 0.5, -4}, (vec2){64, 8}, 0, fire_mask, fire_on_hit);
 
+    entity_create((vec2){width * 0.5, 0}, (vec2){32, 64}, (vec2){0, 0}, (vec2){0, 0}, 0, 0, true, anim_fire_id, NULL, NULL);
+    entity_create((vec2){width * 0.5 + 16, -16}, (vec2){32, 64}, (vec2){0, 0}, (vec2){0, 0}, 0, 0, true, anim_fire_id, NULL, NULL);
+    entity_create((vec2){width * 0.5 - 16, -16}, (vec2){32, 64}, (vec2){0, 0}, (vec2){0, 0}, 0, 0, true, anim_fire_id, NULL, NULL);
+}
+
+int main(int argc, char *argv[]) {
+    time_init(60);
+    SDL_Window *window = render_init();
+    config_init();
+    physics_init();
+    entity_init();
+    animation_init();
+    audio_init();
+
+    audio_sound_load(&SOUND_JUMP, "assets/jump.wav");
+    audio_music_load(&MUSIC_STAGE_1, "assets/breezys_mega_quest_2_stage_1.mp3");
+
+    SDL_ShowCursor(false);
+
+    i32 window_width, window_height;
+    SDL_GetWindowSize(window, &window_width, &window_height);
+    width = window_width / render_get_scale();
+    height = window_height / render_get_scale();
+
     Sprite_Sheet sprite_sheet_player;
     Sprite_Sheet sprite_sheet_map;
     Sprite_Sheet sprite_sheet_enemy_small;
     Sprite_Sheet sprite_sheet_enemy_large;
     Sprite_Sheet sprite_sheet_props;
+    Sprite_Sheet sprite_sheet_fire;
     render_sprite_sheet_init(&sprite_sheet_player, "assets/player.png", 24, 24);
     render_sprite_sheet_init(&sprite_sheet_map, "assets/map.png", 640, 360);
     render_sprite_sheet_init(&sprite_sheet_enemy_small, "assets/enemy_small.png", 24, 24);
     render_sprite_sheet_init(&sprite_sheet_enemy_large, "assets/enemy_large.png", 40, 40);
     render_sprite_sheet_init(&sprite_sheet_props, "assets/props_16x16.png", 16, 16);
+    render_sprite_sheet_init(&sprite_sheet_fire, "assets/fire.png", 32, 64);
 
     size_t adef_player_walk_id = animation_definition_create(&sprite_sheet_player, 0.1, 0, (u8[]){1, 2, 3, 4, 5, 6, 7}, 7);
     size_t adef_player_idle_id = animation_definition_create(&sprite_sheet_player, 0, 0, (u8[]){0}, 1);
@@ -251,10 +315,24 @@ int main(int argc, char *argv[]) {
     anim_enemy_small_enraged_id = animation_create(adef_enemy_small_enraged_id, true);
     anim_enemy_large_enraged_id = animation_create(adef_enemy_large_enraged_id, true);
 
-    Entity *player = entity_get(player_id);
-    player->animation_id = anim_player_idle_id;
+    size_t adef_fire_id = animation_definition_create(&sprite_sheet_fire, 0.1, 0, (u8[]){0, 1, 2, 3, 4, 5, 6, 7}, 7);
+    anim_fire_id = animation_create(adef_fire_id, true);
 
-    u32 texture_slots[8] = {0};
+    size_t adef_projectile_small_id = animation_definition_create(&sprite_sheet_props, 1, 0, (u8[]){0}, 1);
+    anim_projectile_small_id = animation_create(adef_projectile_small_id, false);
+
+    // Init weapons
+    weapons[WEAPON_TYPE_PISTOL] = (Weapon){
+        .projectile_type = PROJECTILE_TYPE_SMALL,
+        .projectile_speed = 200,
+        .fire_rate = 0.1,
+        .recoil = 2.0,
+        .projectile_animation_id = anim_projectile_small_id,
+        .sprite_size = {16, 16},
+        .sprite_offset = {0, 0}
+    };
+
+    reset();
 
     while (!should_quit) {
         time_update();
@@ -271,6 +349,10 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        shoot_timer -= global.time.delta;
+        spawn_timer -= global.time.delta;
+        ground_timer -= global.time.delta;
+
         Entity *player = entity_get(player_id);
         Body *body_player = physics_body_get(player->body_id);
 
@@ -286,7 +368,6 @@ int main(int argc, char *argv[]) {
         animation_update(global.time.delta);
 
         // Spawn enemies.
-        spawn_timer -= global.time.delta;
         if (spawn_timer <= 0) {
             spawn_timer = (f32)((rand() % 200) + 200) / 100.f;
             spawn_timer *= 0.2;

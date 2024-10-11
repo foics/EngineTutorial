@@ -366,3 +366,8 @@ Static_Body *physics_static_body_get(size_t index) {
 size_t physics_static_body_count() {
     return state.static_body_list->len;
 }
+
+void physics_reset(void) {
+    state.static_body_list->len = 0;
+    state.body_list->len = 0;
+}
